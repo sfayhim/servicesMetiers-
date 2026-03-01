@@ -181,3 +181,58 @@ INSERT INTO LIGNE (COMMANDE_NUMERO, MEDICAMENT_REFERENCE, QUANTITE) VALUES
 (6, 6, 110), (6, 16, 65), (6, 26, 85), (6, 36, 60), (6, 91, 70),
 (7, 7, 80), (7, 17, 50), (7, 27, 95), (7, 37, 55), (7, 100, 45),
 (8, 8, 100), (8, 18, 75), (8, 28, 80), (8, 38, 70), (8, 48, 60);
+
+-- Insertion des fournisseurs
+-- Chaque fournisseur peut fournir une ou plusieurs catégories
+-- Utilisation du format nom+suffixe@gmail.com pour que tous les emails arrivent dans la même boite
+INSERT INTO FOURNISSEUR (ID, NOM, EMAIL) VALUES
+(1, 'PharmaDistrib', 'pharmacie+pharmadistrib@gmail.com'),
+(2, 'MédiSupply', 'pharmacie+medisupply@gmail.com'),
+(3, 'BioMed Partners', 'pharmacie+biomed@gmail.com'),
+(4, 'SanteGros', 'pharmacie+santegros@gmail.com'),
+(5, 'VitaPharm', 'pharmacie+vitapharm@gmail.com'),
+(6, 'HealthDistribution', 'pharmacie+healthdist@gmail.com'),
+(7, 'MedicoPlus', 'pharmacie+medicoplas@gmail.com');
+ALTER TABLE Fournisseur ALTER COLUMN id RESTART WITH 8;
+
+-- Relations Fournisseur-Catégorie (ManyToMany)
+-- Chaque catégorie est fournie par au moins 2 fournisseurs
+-- Catégorie 1: Antalgiques et Antipyrétiques -> PharmaDistrib, MédiSupply, SanteGros
+INSERT INTO CATEGORIE_FOURNISSEUR (CATEGORIE_CODE, FOURNISSEUR_ID) VALUES
+(1, 1), (1, 2), (1, 4);
+
+-- Catégorie 2: Anti-inflammatoires -> PharmaDistrib, BioMed Partners, HealthDistribution
+INSERT INTO CATEGORIE_FOURNISSEUR (CATEGORIE_CODE, FOURNISSEUR_ID) VALUES
+(2, 1), (2, 3), (2, 6);
+
+-- Catégorie 3: Antibiotiques -> MédiSupply, BioMed Partners, MedicoPlus
+INSERT INTO CATEGORIE_FOURNISSEUR (CATEGORIE_CODE, FOURNISSEUR_ID) VALUES
+(3, 2), (3, 3), (3, 7);
+
+-- Catégorie 4: Antihypertenseurs -> SanteGros, HealthDistribution, MedicoPlus
+INSERT INTO CATEGORIE_FOURNISSEUR (CATEGORIE_CODE, FOURNISSEUR_ID) VALUES
+(4, 4), (4, 6), (4, 7);
+
+-- Catégorie 5: Antidiabétiques -> BioMed Partners, SanteGros, VitaPharm
+INSERT INTO CATEGORIE_FOURNISSEUR (CATEGORIE_CODE, FOURNISSEUR_ID) VALUES
+(5, 3), (5, 4), (5, 5);
+
+-- Catégorie 6: Antihistaminiques -> PharmaDistrib, VitaPharm, HealthDistribution
+INSERT INTO CATEGORIE_FOURNISSEUR (CATEGORIE_CODE, FOURNISSEUR_ID) VALUES
+(6, 1), (6, 5), (6, 6);
+
+-- Catégorie 7: Vitamines et Compléments -> VitaPharm, MédiSupply, MedicoPlus
+INSERT INTO CATEGORIE_FOURNISSEUR (CATEGORIE_CODE, FOURNISSEUR_ID) VALUES
+(7, 5), (7, 2), (7, 7);
+
+-- Catégorie 8: Médicaments Cardiovasculaires -> SanteGros, HealthDistribution, BioMed Partners
+INSERT INTO CATEGORIE_FOURNISSEUR (CATEGORIE_CODE, FOURNISSEUR_ID) VALUES
+(8, 4), (8, 6), (8, 3);
+
+-- Catégorie 9: Médicaments Gastro-intestinaux -> PharmaDistrib, MédiSupply, MedicoPlus
+INSERT INTO CATEGORIE_FOURNISSEUR (CATEGORIE_CODE, FOURNISSEUR_ID) VALUES
+(9, 1), (9, 2), (9, 7);
+
+-- Catégorie 10: Médicaments Respiratoires -> BioMed Partners, VitaPharm, HealthDistribution
+INSERT INTO CATEGORIE_FOURNISSEUR (CATEGORIE_CODE, FOURNISSEUR_ID) VALUES
+(10, 3), (10, 5), (10, 6);

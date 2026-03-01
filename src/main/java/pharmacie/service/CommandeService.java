@@ -100,8 +100,51 @@ public class CommandeService {
      */
     @Transactional
     public Ligne ajouterLigne(int commandeNum, int medicamentRef, @Positive int quantite) {
-        // TODO : implémenter la méthode
-        throw new UnsupportedOperationException("Not implemented yet");
+        log.info("Service : Ajout d'une ligne de commande : commande={}, medicament={}, quantite={}", commandeNum, medicamentRef, quantite);
+        
+        // Vérifier que la commande existe
+        var commande = commandeDao.findById(commandeNum).orElseThrow();
+        
+        // Vérifier que la commande n'a pas été envoyée
+        if (commande.getEnvoyeele() != null) {
+            throw new IllegalStateException("La commande " + commandeNum + " a déjà été envoyée");
+        }
+        
+        // Vérifier que le médicament existe
+        var medicament = medicamentDao.findById(medicamentRef).orElseThrow();
+        
+        // Vérifier que le médicament n'est pas indisponible
+        if (medicament.isIndisponible()) {
+            throw new IllegalStateException("Le médicament " + medicamentRef + " est indisponible");
+        }
+        
+        // Vérifier que le stock est suffisant
+        if (medicament.getUnitesEnStock() < medicament.getUnitesCommandees() + quantite) {
+            throw new IllegalStateException("Stock insuffisant pour le médicament " + medicamentRef);
+        }
+        
+        // Vérifier si le médicament est déjà présent dans la commande
+        var ligneExistante = ligneDao.findByCommandeAndMedicament(commande, medicament);
+        
+        if (ligneExistante.isPresent()) {
+            // Le médicament est déjà dans la commande, on additionne les quantités
+            var ligne = ligneExistante.get();
+            ligne.setQuantite(ligne.getQuantite() + quantite);
+            medicament.setUnitesCommandees(medicament.getUnitesCommandees() + quantite);
+            return ligne;
+        } else {
+            // Créer une nouvelle ligne
+            var nouvelleLigne = new Ligne(commande, medicament, quantite);
+            ligneDao.save(nouvelleLigne);
+            
+            // Incrémenter la quantité commandée du médicament
+            medicament.setUnitesCommandees(medicament.getUnitesCommandees() + quantite);
+            
+            // Ajouter la ligne à la commande
+            commande.getLignes().add(nouvelleLigne);
+            
+            return nouvelleLigne;
+        }
     }
 
     /**
@@ -118,8 +161,25 @@ public class CommandeService {
      */
     @Transactional
     public void supprimerLigne(int id) {
-        // TODO : implémenter la méthode
-        throw new UnsupportedOperationException("Not implemented yet");
+        log.info("Service : Suppression de la ligne {}", id);
+        
+        // Vérifier que la ligne existe
+        var ligne = ligneDao.findById(id).orElseThrow();
+        
+        // Vérifier que la commande n'a pas été envoyée
+        if (ligne.getCommande().getEnvoyeele() != null) {
+            throw new IllegalStateException("La commande a déjà été envoyée, impossible de supprimer la ligne");
+        }
+        
+        // Décrémenter la quantité commandée du médicament
+        var medicament = ligne.getMedicament();
+        medicament.setUnitesCommandees(medicament.getUnitesCommandees() - ligne.getQuantite());
+        
+        // Supprimer la ligne de la commande
+        ligne.getCommande().getLignes().remove(ligne);
+        
+        // Supprimer la ligne
+        ligneDao.delete(ligne);
     }
 
     /**
@@ -139,8 +199,29 @@ public class CommandeService {
      */
     @Transactional
     public Commande enregistreExpedition(int commandeNum) {
-        // TODO : implémenter la méthode
-        throw new UnsupportedOperationException("Not implemented yet");
+        log.info("Service : Enregistrement de l'expédition de la commande {}", commandeNum);
+        
+        // Vérifier que la commande existe
+        var commande = commandeDao.findById(commandeNum).orElseThrow();
+        
+        // Vérifier que la commande n'a pas déjà été envoyée
+        if (commande.getEnvoyeele() != null) {
+            throw new IllegalStateException("La commande " + commandeNum + " a déjà été envoyée");
+        }
+        
+        // Enregistrer la date d'expédition
+        commande.setEnvoyeele(LocalDate.now());
+        
+        // Pour chaque ligne de la commande, mettre à jour le stock et les quantités commandées
+        for (var ligne : commande.getLignes()) {
+            var medicament = ligne.getMedicament();
+            // Décrémenter le stock
+            medicament.setUnitesEnStock(medicament.getUnitesEnStock() - ligne.getQuantite());
+            // Décrémenter les unités commandées
+            medicament.setUnitesCommandees(medicament.getUnitesCommandees() - ligne.getQuantite());
+        }
+        
+        return commande;
     }
 
     /**

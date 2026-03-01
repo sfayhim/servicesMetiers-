@@ -32,3 +32,14 @@ build/
 .vscode/
 
 .DS_Store
+
+### Environment Variables ###
+.env
+.env.local
+.env.production
+
+### Logs ###
+*.log
+
+### Temporary files ###
+/tmp/

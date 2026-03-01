@@ -37,3 +37,18 @@ INSERT INTO Ligne(commande_numero, medicament_reference, quantite) VALUES ( 9999
 INSERT INTO Commande(numero, dispensaire_code, saisiele, envoyeele, port, destinataire, adresse, ville, region, code_postal, pays, remise) VALUES
     ( 99998, '2COM', '1994-11-29', NULL, 831.00, 'Bon app''', '12, rue des Bouchers', 'Marseille', NULL, '13008', 'France', 0.00);
 INSERT INTO Ligne(commande_numero, medicament_reference, quantite) VALUES ( 99998, 98, 16);
+
+-- Insertion des fournisseurs pour les tests
+INSERT INTO Fournisseur (id, nom, email) VALUES
+    (1, 'Fournisseur Test 1', 'test+fournisseur1@gmail.com'),
+    (2, 'Fournisseur Test 2', 'test+fournisseur2@gmail.com'),
+    (3, 'Fournisseur Test 3', 'test+fournisseur3@gmail.com');
+
+-- Relations Fournisseur-Categorie pour les tests
+-- Catégorie 98 (avec 7 médicaments) a 2 fournisseurs
+INSERT INTO Categorie_Fournisseur (categorie_code, fournisseur_id) VALUES
+    (98, 1), (98, 2);
+
+-- Catégorie 99 (sans médicaments) a aussi 2 fournisseurs
+INSERT INTO Categorie_Fournisseur (categorie_code, fournisseur_id) VALUES
+    (99, 2), (99, 3);
